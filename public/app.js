@@ -52,8 +52,8 @@ async function loadTasks() {
         renderTasks();
         loadStats();
     } catch (error) {
-        console.error('Error loading tasks:', error);
-        showError('Failed to load tasks. Make sure the server is running.');
+        console.error('Error loading patient records:', error);
+        showError('Failed to load patient records. Make sure the server is running.');
     }
 }
 
@@ -106,10 +106,10 @@ async function handleAddTask(e) {
         taskDescription.value = '';
         taskPriority.value = 'medium';
         taskDueDate.value = '';
-        taskCategory.value = 'general';
+        taskCategory.value = 'General';
     } catch (error) {
-        console.error('Error adding task:', error);
-        showError('Failed to add task');
+        console.error('Error adding patient record:', error);
+        showError('Failed to add patient record');
     }
 }
 
@@ -118,7 +118,7 @@ function getTaskId(task) {
     return task._id || task.id;
 }
 
-// Toggle task completion
+// Toggle patient treatment status
 async function toggleTask(taskId) {
     const task = allTasks.find(t => getTaskId(t) === taskId);
     if (!task) return;
@@ -132,7 +132,7 @@ async function toggleTask(taskId) {
             body: JSON.stringify({ completed: !task.completed })
         });
         
-        if (!response.ok) throw new Error('Failed to update task');
+        if (!response.ok) throw new Error('Failed to update patient status');
         
         const updatedTask = await response.json();
         const index = allTasks.findIndex(t => getTaskId(t) === taskId);
@@ -140,46 +140,46 @@ async function toggleTask(taskId) {
         renderTasks();
         loadStats();
     } catch (error) {
-        console.error('Error toggling task:', error);
-        showError('Failed to update task');
+        console.error('Error updating patient status:', error);
+        showError('Failed to update patient status');
     }
 }
 
-// Delete task
+// Delete patient record
 async function deleteTask(taskId) {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!confirm('Are you sure you want to delete this patient record?')) return;
     
     try {
         const response = await fetch(`${API_URL}/${taskId}`, {
             method: 'DELETE'
         });
         
-        if (!response.ok) throw new Error('Failed to delete task');
+        if (!response.ok) throw new Error('Failed to delete patient record');
         
         allTasks = allTasks.filter(t => getTaskId(t) !== taskId);
         renderTasks();
         loadStats();
     } catch (error) {
-        console.error('Error deleting task:', error);
-        showError('Failed to delete task');
+        console.error('Error deleting patient record:', error);
+        showError('Failed to delete patient record');
     }
 }
 
-// Edit task
+// Edit patient record
 function editTask(taskId) {
     const task = allTasks.find(t => getTaskId(t) === taskId);
     if (!task) return;
     
-    const newTitle = prompt('Edit task title:', task.title);
+    const newTitle = prompt('Edit patient name:', task.title);
     if (newTitle === null || newTitle.trim() === '') return;
     
-    const newDescription = prompt('Edit task description:', task.description);
+    const newDescription = prompt('Edit medical notes:', task.description);
     if (newDescription === null) return;
     
     updateTask(taskId, { title: newTitle.trim(), description: newDescription.trim() });
 }
 
-// Update task
+// Update patient record
 async function updateTask(taskId, updates) {
     try {
         const response = await fetch(`${API_URL}/${taskId}`, {
@@ -190,15 +190,15 @@ async function updateTask(taskId, updates) {
             body: JSON.stringify(updates)
         });
         
-        if (!response.ok) throw new Error('Failed to update task');
+        if (!response.ok) throw new Error('Failed to update patient record');
         
         const updatedTask = await response.json();
         const index = allTasks.findIndex(t => getTaskId(t) === taskId);
         allTasks[index] = updatedTask;
         renderTasks();
     } catch (error) {
-        console.error('Error updating task:', error);
-        showError('Failed to update task');
+        console.error('Error updating patient record:', error);
+        showError('Failed to update patient record');
     }
 }
 
@@ -209,7 +209,7 @@ function renderTasks() {
     if (filteredTasks.length === 0) {
         tasksList.innerHTML = `
             <div class="empty-state">
-                <p>No tasks found. Add a new task to get started! 🚀</p>
+                <p>No patient records found. Add a new appointment to get started! 🏥</p>
             </div>
         `;
         return;

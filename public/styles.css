@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #8a99a7 0%, #a2b1c7 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -80,7 +80,7 @@ header p {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #1e88e5;
 }
 
 .btn {
@@ -94,13 +94,13 @@ header p {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1e88e5 0%, #0d47a1 100%);
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 15px rgba(30, 136, 229, 0.4);
 }
 
 /* Stats Container */
@@ -127,7 +127,7 @@ header p {
 .stat-number {
     font-size: 2.5rem;
     font-weight: bold;
-    color: #667eea;
+    color: #1e88e5;
 }
 
 .stat-label {
@@ -156,8 +156,8 @@ header p {
 
 .search-container input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+    border-color: #1e88e5;
+    box-shadow: 0 0 10px rgba(30, 136, 229, 0.2);
 }
 
 .filter-buttons {
@@ -169,9 +169,9 @@ header p {
 
 .filter-btn {
     padding: 8px 20px;
-    border: 2px solid #667eea;
+    border: 2px solid #1e88e5;
     background: white;
-    color: #667eea;
+    color: #1e88e5;
     border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
@@ -179,11 +179,11 @@ header p {
 }
 
 .filter-btn:hover {
-    background: #f0f0f0;
+    background: #e3f2fd;
 }
 
 .filter-btn.active {
-    background: #667eea;
+    background: #1e88e5;
     color: white;
 }
 
@@ -290,7 +290,7 @@ header p {
 }
 
 .category-badge {
-    background: #667eea;
+    background: #1e88e5;
     color: white;
 }
 

@@ -14,10 +14,10 @@ mongoose.connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(() => console.log('✅ Connected to MongoDB'))
+.then(() => console.log('✅ Connected to MongoDB - Healthcare Database'))
 .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// Task Schema
+// Patient Schema
 const taskSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -44,7 +44,7 @@ const taskSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        default: 'general',
+        default: 'General',
         trim: true
     },
     createdAt: {
@@ -57,7 +57,7 @@ const taskSchema = new mongoose.Schema({
     }
 });
 
-const Task = mongoose.model('Task', taskSchema);
+const Task = mongoose.model('Patient', taskSchema);
 
 // Middleware
 app.use(cors());
@@ -66,17 +66,17 @@ app.use(express.static('public'));
 
 // Routes
 
-// Get all tasks
+// Get all patients
 app.get('/api/tasks', async (req, res) => {
     try {
         const tasks = await Task.find().sort({ createdAt: -1 });
         res.json(tasks);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch tasks', message: error.message });
+        res.status(500).json({ error: 'Failed to fetch patient records', message: error.message });
     }
 });
 
-// Get task statistics
+// Get patient statistics
 app.get('/api/tasks/stats/summary', async (req, res) => {
     try {
         const total = await Task.countDocuments();
@@ -102,26 +102,26 @@ app.get('/api/tasks/stats/summary', async (req, res) => {
     }
 });
 
-// Get single task
+// Get single patient
 app.get('/api/tasks/:id', async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
         if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
+            return res.status(404).json({ error: 'Patient record not found' });
         }
         res.json(task);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch task', message: error.message });
+        res.status(500).json({ error: 'Failed to fetch patient record', message: error.message });
     }
 });
 
-// Create new task
+// Create new patient record
 app.post('/api/tasks', async (req, res) => {
     try {
         const { title, description, priority, dueDate, category } = req.body;
         
         if (!title) {
-            return res.status(400).json({ error: 'Title is required' });
+            return res.status(400).json({ error: 'Patient name is required' });
         }
         
         const newTask = new Task({
@@ -129,17 +129,17 @@ app.post('/api/tasks', async (req, res) => {
             description: description || '',
             priority: priority || 'medium',
             dueDate: dueDate || null,
-            category: category || 'general'
+            category: category || 'General'
         });
         
         await newTask.save();
         res.status(201).json(newTask);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to create task', message: error.message });
+        res.status(500).json({ error: 'Failed to create patient record', message: error.message });
     }
 });
 
-// Update task
+// Update patient record
 app.put('/api/tasks/:id', async (req, res) => {
     try {
         const { title, description, completed, priority, dueDate, category } = req.body;
@@ -159,27 +159,27 @@ app.put('/api/tasks/:id', async (req, res) => {
         );
         
         if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
+            return res.status(404).json({ error: 'Patient record not found' });
         }
         
         res.json(task);
     } catch (error) {
-        res.status(500).json({ error: 'Failed to update task', message: error.message });
+        res.status(500).json({ error: 'Failed to update patient record', message: error.message });
     }
 });
 
-// Delete task
+// Delete patient record
 app.delete('/api/tasks/:id', async (req, res) => {
     try {
         const task = await Task.findByIdAndDelete(req.params.id);
         
         if (!task) {
-            return res.status(404).json({ error: 'Task not found' });
+            return res.status(404).json({ error: 'Patient record not found' });
         }
         
-        res.json({ message: 'Task deleted successfully' });
+        res.json({ message: 'Patient record deleted successfully' });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to delete task', message: error.message });
+        res.status(500).json({ error: 'Failed to delete patient record', message: error.message });
     }
 });
 

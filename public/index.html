@@ -3,57 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Manager App</title>
+    <title>Healthcare Patient Management System</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📝 Task Manager</h1>
-            <p>Organize your tasks efficiently</p>
+            <h1>🏥 Healthcare Patient Management</h1>
+            <p>Manage patient appointments and records efficiently</p>
         </header>
 
         <div class="task-form-container">
-            <h2>Add New Task</h2>
+            <h2>Add New Patient Appointment</h2>
             <form id="taskForm">
                 <div class="form-group">
-                    <label for="taskTitle">Title *</label>
-                    <input type="text" id="taskTitle" placeholder="Enter task title" required>
+                    <label for="taskTitle">Patient Name *</label>
+                    <input type="text" id="taskTitle" placeholder="Enter patient full name" required>
                 </div>
                 <div class="form-group">
-                    <label for="taskDescription">Description</label>
-                    <textarea id="taskDescription" placeholder="Enter task description (optional)" rows="3"></textarea>
+                    <label for="taskDescription">Medical Notes / Symptoms</label>
+                    <textarea id="taskDescription" placeholder="Enter symptoms, diagnosis, or treatment notes" rows="3"></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="taskPriority">Priority</label>
+                        <label for="taskPriority">Urgency Level</label>
                         <select id="taskPriority">
-                            <option value="low">🟢 Low</option>
-                            <option value="medium" selected>🟡 Medium</option>
-                            <option value="high">🔴 High</option>
+                            <option value="low">🟢 Routine</option>
+                            <option value="medium" selected>🟡 Moderate</option>
+                            <option value="high">🔴 Critical/Emergency</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="taskDueDate">Due Date</label>
+                        <label for="taskDueDate">Appointment Date</label>
                         <input type="date" id="taskDueDate">
                     </div>
                     <div class="form-group">
-                        <label for="taskCategory">Category</label>
-                        <input type="text" id="taskCategory" placeholder="e.g., Work, Personal" value="general">
+                        <label for="taskCategory">Department</label>
+                        <input type="text" id="taskCategory" placeholder="e.g., Cardiology, Pediatrics" value="General">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Task</button>
+                <button type="submit" class="btn btn-primary">Schedule Appointment</button>
             </form>
         </div>
 
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-number" id="totalTasks">0</div>
-                <div class="stat-label">Total Tasks</div>
+                <div class="stat-label">Total Patients</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="completedTasks">0</div>
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">Treated</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number" id="pendingTasks">0</div>
@@ -61,24 +61,24 @@
             </div>
             <div class="stat-card stat-overdue">
                 <div class="stat-number" id="overdueTasks">0</div>
-                <div class="stat-label">Overdue</div>
+                <div class="stat-label">Overdue/Urgent</div>
             </div>
         </div>
 
         <div class="tasks-container">
-            <h2>My Tasks</h2>
+            <h2>Patient Records</h2>
             <div class="search-container">
-                <input type="text" id="searchInput" placeholder="🔍 Search tasks...">
+                <input type="text" id="searchInput" placeholder="🔍 Search patients by name, symptoms, or department...">
             </div>
             <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="active">Active</button>
-                <button class="filter-btn" data-filter="completed">Completed</button>
-                <button class="filter-btn" data-filter="high">High Priority</button>
-                <button class="filter-btn" data-filter="overdue">Overdue</button>
+                <button class="filter-btn active" data-filter="all">All Patients</button>
+                <button class="filter-btn" data-filter="active">Pending Treatment</button>
+                <button class="filter-btn" data-filter="completed">Treated</button>
+                <button class="filter-btn" data-filter="high">Critical Cases</button>
+                <button class="filter-btn" data-filter="overdue">Overdue Appointments</button>
             </div>
             <div id="tasksList" class="tasks-list">
-                <!-- Tasks will be dynamically loaded here -->
+                <!-- Patient records will be dynamically loaded here -->
             </div>
         </div>
     </div>
