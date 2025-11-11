@@ -24,16 +24,58 @@
                     <label for="taskDescription">Description</label>
                     <textarea id="taskDescription" placeholder="Enter task description (optional)" rows="3"></textarea>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="taskPriority">Priority</label>
+                        <select id="taskPriority">
+                            <option value="low">🟢 Low</option>
+                            <option value="medium" selected>🟡 Medium</option>
+                            <option value="high">🔴 High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDueDate">Due Date</label>
+                        <input type="date" id="taskDueDate">
+                    </div>
+                    <div class="form-group">
+                        <label for="taskCategory">Category</label>
+                        <input type="text" id="taskCategory" placeholder="e.g., Work, Personal" value="general">
+                    </div>
+                </div>
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>
         </div>
 
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-number" id="totalTasks">0</div>
+                <div class="stat-label">Total Tasks</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedTasks">0</div>
+                <div class="stat-label">Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingTasks">0</div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card stat-overdue">
+                <div class="stat-number" id="overdueTasks">0</div>
+                <div class="stat-label">Overdue</div>
+            </div>
+        </div>
+
         <div class="tasks-container">
             <h2>My Tasks</h2>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="🔍 Search tasks...">
+            </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="active">Active</button>
                 <button class="filter-btn" data-filter="completed">Completed</button>
+                <button class="filter-btn" data-filter="high">High Priority</button>
+                <button class="filter-btn" data-filter="overdue">Overdue</button>
             </div>
             <div id="tasksList" class="tasks-list">
                 <!-- Tasks will be dynamically loaded here -->

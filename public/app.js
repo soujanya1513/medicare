@@ -4,23 +4,34 @@ const API_URL = 'http://localhost:3000/api/tasks';
 // Global state
 let allTasks = [];
 let currentFilter = 'all';
+let searchQuery = '';
 
 // DOM Elements
 const taskForm = document.getElementById('taskForm');
 const taskTitle = document.getElementById('taskTitle');
 const taskDescription = document.getElementById('taskDescription');
+const taskPriority = document.getElementById('taskPriority');
+const taskDueDate = document.getElementById('taskDueDate');
+const taskCategory = document.getElementById('taskCategory');
 const tasksList = document.getElementById('tasksList');
 const filterButtons = document.querySelectorAll('.filter-btn');
+const searchInput = document.getElementById('searchInput');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
+    loadStats();
     setupEventListeners();
 });
 
 // Setup event listeners
 function setupEventListeners() {
     taskForm.addEventListener('submit', handleAddTask);
+    
+    searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase();
+        renderTasks();
+    });
     
     filterButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -39,9 +50,26 @@ async function loadTasks() {
         if (!response.ok) throw new Error('Failed to fetch tasks');
         allTasks = await response.json();
         renderTasks();
+        loadStats();
     } catch (error) {
         console.error('Error loading tasks:', error);
         showError('Failed to load tasks. Make sure the server is running.');
+    }
+}
+
+// Load statistics
+async function loadStats() {
+    try {
+        const response = await fetch(`http://localhost:3000/api/tasks/stats/summary`);
+        if (!response.ok) throw new Error('Failed to fetch stats');
+        const stats = await response.json();
+        
+        document.getElementById('totalTasks').textContent = stats.total;
+        document.getElementById('completedTasks').textContent = stats.completed;
+        document.getElementById('pendingTasks').textContent = stats.pending;
+        document.getElementById('overdueTasks').textContent = stats.overdue;
+    } catch (error) {
+        console.error('Error loading stats:', error);
     }
 }
 
@@ -51,6 +79,9 @@ async function handleAddTask(e) {
     
     const title = taskTitle.value.trim();
     const description = taskDescription.value.trim();
+    const priority = taskPriority.value;
+    const dueDate = taskDueDate.value;
+    const category = taskCategory.value.trim();
     
     if (!title) return;
     
@@ -60,7 +91,7 @@ async function handleAddTask(e) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ title, description })
+            body: JSON.stringify({ title, description, priority, dueDate, category })
         });
         
         if (!response.ok) throw new Error('Failed to create task');
@@ -68,10 +99,14 @@ async function handleAddTask(e) {
         const newTask = await response.json();
         allTasks.unshift(newTask); // Add to beginning of array
         renderTasks();
+        loadStats();
         
         // Reset form
         taskTitle.value = '';
         taskDescription.value = '';
+        taskPriority.value = 'medium';
+        taskDueDate.value = '';
+        taskCategory.value = 'general';
     } catch (error) {
         console.error('Error adding task:', error);
         showError('Failed to add task');
@@ -103,6 +138,7 @@ async function toggleTask(taskId) {
         const index = allTasks.findIndex(t => getTaskId(t) === taskId);
         allTasks[index] = updatedTask;
         renderTasks();
+        loadStats();
     } catch (error) {
         console.error('Error toggling task:', error);
         showError('Failed to update task');
@@ -122,6 +158,7 @@ async function deleteTask(taskId) {
         
         allTasks = allTasks.filter(t => getTaskId(t) !== taskId);
         renderTasks();
+        loadStats();
     } catch (error) {
         console.error('Error deleting task:', error);
         showError('Failed to delete task');
@@ -180,8 +217,12 @@ function renderTasks() {
     
     tasksList.innerHTML = filteredTasks.map(task => {
         const taskId = getTaskId(task);
+        const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.completed;
+        const priorityClass = `priority-${task.priority || 'medium'}`;
+        const overdueClass = isOverdue ? 'overdue' : '';
+        
         return `
-            <div class="task-item ${task.completed ? 'completed' : ''}">
+            <div class="task-item ${task.completed ? 'completed' : ''} ${priorityClass} ${overdueClass}">
                 <input 
                     type="checkbox" 
                     class="task-checkbox" 
@@ -191,6 +232,21 @@ function renderTasks() {
                 <div class="task-content">
                     <div class="task-title">${escapeHtml(task.title)}</div>
                     ${task.description ? `<div class="task-description">${escapeHtml(task.description)}</div>` : ''}
+                    <div class="task-meta">
+                        <span class="task-badge priority-badge ${priorityClass}">
+                            ${getPriorityIcon(task.priority)} ${capitalize(task.priority || 'medium')}
+                        </span>
+                        ${task.dueDate ? `
+                            <span class="task-badge due-date-badge ${isOverdue ? 'overdue' : ''}">
+                                📅 ${formatDate(task.dueDate)}
+                            </span>
+                        ` : ''}
+                        ${task.category && task.category !== 'general' ? `
+                            <span class="task-badge category-badge">
+                                🏷️ ${escapeHtml(task.category)}
+                            </span>
+                        ` : ''}
+                    </div>
                 </div>
                 <div class="task-actions">
                     <button class="btn-edit" onclick="editTask('${taskId}')">Edit</button>
@@ -203,14 +259,36 @@ function renderTasks() {
 
 // Filter tasks
 function filterTasks(tasks) {
+    let filtered = tasks;
+    
+    // Apply filter
     switch (currentFilter) {
         case 'active':
-            return tasks.filter(t => !t.completed);
+            filtered = filtered.filter(t => !t.completed);
+            break;
         case 'completed':
-            return tasks.filter(t => t.completed);
-        default:
-            return tasks;
+            filtered = filtered.filter(t => t.completed);
+            break;
+        case 'high':
+            filtered = filtered.filter(t => t.priority === 'high');
+            break;
+        case 'overdue':
+            filtered = filtered.filter(t => {
+                return t.dueDate && new Date(t.dueDate) < new Date() && !t.completed;
+            });
+            break;
     }
+    
+    // Apply search
+    if (searchQuery) {
+        filtered = filtered.filter(t => {
+            return t.title.toLowerCase().includes(searchQuery) ||
+                   (t.description && t.description.toLowerCase().includes(searchQuery)) ||
+                   (t.category && t.category.toLowerCase().includes(searchQuery));
+        });
+    }
+    
+    return filtered;
 }
 
 // Utility: Escape HTML to prevent XSS
@@ -223,4 +301,45 @@ function escapeHtml(text) {
 // Show error message
 function showError(message) {
     alert(message);
+}
+
+// Helper: Get priority icon
+function getPriorityIcon(priority) {
+    switch(priority) {
+        case 'high': return '🔴';
+        case 'medium': return '🟡';
+        case 'low': return '🟢';
+        default: return '🟡';
+    }
+}
+
+// Helper: Capitalize string
+function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+// Helper: Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    // Reset time part for comparison
+    today.setHours(0, 0, 0, 0);
+    tomorrow.setHours(0, 0, 0, 0);
+    const compareDate = new Date(date);
+    compareDate.setHours(0, 0, 0, 0);
+    
+    if (compareDate.getTime() === today.getTime()) {
+        return 'Today';
+    } else if (compareDate.getTime() === tomorrow.getTime()) {
+        return 'Tomorrow';
+    } else if (compareDate < today) {
+        const options = { month: 'short', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    } else {
+        const options = { month: 'short', day: 'numeric' };
+        return date.toLocaleDateString(undefined, options);
+    }
 }

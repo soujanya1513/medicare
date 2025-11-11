@@ -33,7 +33,25 @@ const taskSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    priority: {
+        type: String,
+        enum: ['low', 'medium', 'high'],
+        default: 'medium'
+    },
+    dueDate: {
+        type: Date,
+        default: null
+    },
+    category: {
+        type: String,
+        default: 'general',
+        trim: true
+    },
     createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedAt: {
         type: Date,
         default: Date.now
     }
@@ -58,6 +76,32 @@ app.get('/api/tasks', async (req, res) => {
     }
 });
 
+// Get task statistics
+app.get('/api/tasks/stats/summary', async (req, res) => {
+    try {
+        const total = await Task.countDocuments();
+        const completed = await Task.countDocuments({ completed: true });
+        const pending = await Task.countDocuments({ completed: false });
+        const overdue = await Task.countDocuments({ 
+            dueDate: { $lt: new Date() }, 
+            completed: false 
+        });
+        const high = await Task.countDocuments({ priority: 'high' });
+        const medium = await Task.countDocuments({ priority: 'medium' });
+        const low = await Task.countDocuments({ priority: 'low' });
+        
+        res.json({
+            total,
+            completed,
+            pending,
+            overdue,
+            priority: { high, medium, low }
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch statistics', message: error.message });
+    }
+});
+
 // Get single task
 app.get('/api/tasks/:id', async (req, res) => {
     try {
@@ -74,7 +118,7 @@ app.get('/api/tasks/:id', async (req, res) => {
 // Create new task
 app.post('/api/tasks', async (req, res) => {
     try {
-        const { title, description } = req.body;
+        const { title, description, priority, dueDate, category } = req.body;
         
         if (!title) {
             return res.status(400).json({ error: 'Title is required' });
@@ -82,7 +126,10 @@ app.post('/api/tasks', async (req, res) => {
         
         const newTask = new Task({
             title,
-            description: description || ''
+            description: description || '',
+            priority: priority || 'medium',
+            dueDate: dueDate || null,
+            category: category || 'general'
         });
         
         await newTask.save();
@@ -95,12 +142,15 @@ app.post('/api/tasks', async (req, res) => {
 // Update task
 app.put('/api/tasks/:id', async (req, res) => {
     try {
-        const { title, description, completed } = req.body;
+        const { title, description, completed, priority, dueDate, category } = req.body;
         
-        const updateData = {};
+        const updateData = { updatedAt: Date.now() };
         if (title !== undefined) updateData.title = title;
         if (description !== undefined) updateData.description = description;
         if (completed !== undefined) updateData.completed = completed;
+        if (priority !== undefined) updateData.priority = priority;
+        if (dueDate !== undefined) updateData.dueDate = dueDate;
+        if (category !== undefined) updateData.category = category;
         
         const task = await Task.findByIdAndUpdate(
             req.params.id,
