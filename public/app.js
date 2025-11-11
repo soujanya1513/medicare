@@ -5,6 +5,7 @@ const API_URL = 'http://localhost:3000/api/tasks';
 let allTasks = [];
 let currentFilter = 'all';
 let searchQuery = '';
+let currentEditingTaskId = null;
 
 // DOM Elements
 const taskForm = document.getElementById('taskForm');
@@ -16,13 +17,22 @@ const taskCategory = document.getElementById('taskCategory');
 const tasksList = document.getElementById('tasksList');
 const filterButtons = document.querySelectorAll('.filter-btn');
 const searchInput = document.getElementById('searchInput');
+const currentDateElement = document.getElementById('currentDate');
+const editModal = document.getElementById('editModal');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
     loadTasks();
     loadStats();
     setupEventListeners();
+    updateCurrentDate();
 });
+
+// Update current date display
+function updateCurrentDate() {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    currentDateElement.textContent = new Date().toLocaleDateString(undefined, options);
+}
 
 // Setup event listeners
 function setupEventListeners() {
@@ -46,14 +56,17 @@ function setupEventListeners() {
 // Load tasks from server
 async function loadTasks() {
     try {
+        showLoading();
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error('Failed to fetch tasks');
         allTasks = await response.json();
         renderTasks();
         loadStats();
+        hideLoading();
     } catch (error) {
         console.error('Error loading patient records:', error);
-        showError('Failed to load patient records. Make sure the server is running.');
+        showNotification('Failed to load patient records. Make sure the server is running.', 'error');
+        hideLoading();
     }
 }
 
@@ -83,9 +96,14 @@ async function handleAddTask(e) {
     const dueDate = taskDueDate.value;
     const category = taskCategory.value.trim();
     
-    if (!title) return;
+    if (!title) {
+        showNotification('Please enter patient name', 'error');
+        taskTitle.focus();
+        return;
+    }
     
     try {
+        showLoading();
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -101,15 +119,17 @@ async function handleAddTask(e) {
         renderTasks();
         loadStats();
         
-        // Reset form
-        taskTitle.value = '';
-        taskDescription.value = '';
+        // Reset form with animation
+        taskForm.reset();
         taskPriority.value = 'medium';
-        taskDueDate.value = '';
         taskCategory.value = 'General';
+        
+        showNotification('Patient appointment scheduled successfully! ✅', 'success');
+        hideLoading();
     } catch (error) {
         console.error('Error adding patient record:', error);
-        showError('Failed to add patient record');
+        showNotification('Failed to add patient record', 'error');
+        hideLoading();
     }
 }
 
@@ -139,17 +159,25 @@ async function toggleTask(taskId) {
         allTasks[index] = updatedTask;
         renderTasks();
         loadStats();
+        
+        const status = updatedTask.completed ? 'treated' : 'pending';
+        showNotification(`Patient marked as ${status}`, 'success');
     } catch (error) {
         console.error('Error updating patient status:', error);
-        showError('Failed to update patient status');
+        showNotification('Failed to update patient status', 'error');
     }
 }
 
 // Delete patient record
 async function deleteTask(taskId) {
-    if (!confirm('Are you sure you want to delete this patient record?')) return;
+    const task = allTasks.find(t => getTaskId(t) === taskId);
+    if (!task) return;
+    
+    // Professional confirmation
+    if (!confirm(`⚠️ Are you sure you want to delete patient record for "${task.title}"?\n\nThis action cannot be undone.`)) return;
     
     try {
+        showLoading();
         const response = await fetch(`${API_URL}/${taskId}`, {
             method: 'DELETE'
         });
@@ -159,30 +187,59 @@ async function deleteTask(taskId) {
         allTasks = allTasks.filter(t => getTaskId(t) !== taskId);
         renderTasks();
         loadStats();
+        showNotification('Patient record deleted successfully', 'success');
+        hideLoading();
     } catch (error) {
         console.error('Error deleting patient record:', error);
-        showError('Failed to delete patient record');
+        showNotification('Failed to delete patient record', 'error');
+        hideLoading();
     }
 }
 
-// Edit patient record
+// Edit patient record - Open modal
 function editTask(taskId) {
     const task = allTasks.find(t => getTaskId(t) === taskId);
     if (!task) return;
     
-    const newTitle = prompt('Edit patient name:', task.title);
-    if (newTitle === null || newTitle.trim() === '') return;
+    currentEditingTaskId = taskId;
     
-    const newDescription = prompt('Edit medical notes:', task.description);
-    if (newDescription === null) return;
+    // Populate modal fields
+    document.getElementById('editTitle').value = task.title;
+    document.getElementById('editDescription').value = task.description || '';
+    document.getElementById('editPriority').value = task.priority || 'medium';
+    document.getElementById('editDueDate').value = task.dueDate ? task.dueDate.split('T')[0] : '';
+    document.getElementById('editCategory').value = task.category || 'General';
     
-    updateTask(taskId, { title: newTitle.trim(), description: newDescription.trim() });
+    // Show modal
+    editModal.classList.add('show');
 }
 
-// Update patient record
-async function updateTask(taskId, updates) {
+// Close edit modal
+function closeEditModal() {
+    editModal.classList.remove('show');
+    currentEditingTaskId = null;
+}
+
+// Save edit from modal
+async function saveEdit() {
+    if (!currentEditingTaskId) return;
+    
+    const title = document.getElementById('editTitle').value.trim();
+    const description = document.getElementById('editDescription').value.trim();
+    const priority = document.getElementById('editPriority').value;
+    const dueDate = document.getElementById('editDueDate').value;
+    const category = document.getElementById('editCategory').value.trim();
+    
+    if (!title) {
+        showNotification('Patient name is required', 'error');
+        return;
+    }
+    
+    const updates = { title, description, priority, dueDate, category };
+    
     try {
-        const response = await fetch(`${API_URL}/${taskId}`, {
+        showLoading();
+        const response = await fetch(`${API_URL}/${currentEditingTaskId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -193,14 +250,26 @@ async function updateTask(taskId, updates) {
         if (!response.ok) throw new Error('Failed to update patient record');
         
         const updatedTask = await response.json();
-        const index = allTasks.findIndex(t => getTaskId(t) === taskId);
+        const index = allTasks.findIndex(t => getTaskId(t) === currentEditingTaskId);
         allTasks[index] = updatedTask;
         renderTasks();
+        
+        closeEditModal();
+        showNotification('Patient record updated successfully! ✅', 'success');
+        hideLoading();
     } catch (error) {
         console.error('Error updating patient record:', error);
-        showError('Failed to update patient record');
+        showNotification('Failed to update patient record', 'error');
+        hideLoading();
     }
 }
+
+// Close modal when clicking outside
+editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) {
+        closeEditModal();
+    }
+});
 
 // Render tasks
 function renderTasks() {
@@ -298,9 +367,105 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Show error message
-function showError(message) {
-    alert(message);
+// Loading indicator
+function showLoading() {
+    // Simple loading state - could be enhanced with a spinner
+    document.body.style.cursor = 'wait';
+}
+
+function hideLoading() {
+    document.body.style.cursor = 'default';
+}
+
+// Professional notification system
+function showNotification(message, type = 'info') {
+    // Remove existing notification if any
+    const existing = document.querySelector('.notification');
+    if (existing) existing.remove();
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-icon">${getNotificationIcon(type)}</span>
+            <span class="notification-message">${message}</span>
+        </div>
+    `;
+    
+    // Add styles dynamically
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+            font-weight: 600;
+            color: white;
+            min-width: 300px;
+        }
+        
+        .notification-success {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+        }
+        
+        .notification-error {
+            background: linear-gradient(135deg, #dc3545 0%, #c62828 100%);
+        }
+        
+        .notification-info {
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .notification-icon {
+            font-size: 1.3rem;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+    document.body.appendChild(notification);
+    
+    // Auto remove after 3 seconds
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function getNotificationIcon(type) {
+    switch(type) {
+        case 'success': return '✅';
+        case 'error': return '❌';
+        case 'info': return 'ℹ️';
+        default: return 'ℹ️';
+    }
 }
 
 // Helper: Get priority icon

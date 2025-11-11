@@ -3,82 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Healthcare Patient Management System</title>
+    <title>MediCare - Healthcare Patient Management System</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🏥 Healthcare Patient Management</h1>
-            <p>Manage patient appointments and records efficiently</p>
+            <div class="logo">
+                <span class="logo-icon">🏥</span>
+                <div class="logo-text">
+                    <h1>MediCare</h1>
+                    <p class="tagline">Professional Healthcare Management System</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <span class="current-date" id="currentDate"></span>
+            </div>
         </header>
 
-        <div class="task-form-container">
-            <h2>Add New Patient Appointment</h2>
-            <form id="taskForm">
-                <div class="form-group">
-                    <label for="taskTitle">Patient Name *</label>
-                    <input type="text" id="taskTitle" placeholder="Enter patient full name" required>
-                </div>
-                <div class="form-group">
-                    <label for="taskDescription">Medical Notes / Symptoms</label>
-                    <textarea id="taskDescription" placeholder="Enter symptoms, diagnosis, or treatment notes" rows="3"></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="taskPriority">Urgency Level</label>
-                        <select id="taskPriority">
-                            <option value="low">🟢 Routine</option>
-                            <option value="medium" selected>🟡 Moderate</option>
-                            <option value="high">🔴 Critical/Emergency</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDueDate">Appointment Date</label>
-                        <input type="date" id="taskDueDate">
-                    </div>
-                    <div class="form-group">
-                        <label for="taskCategory">Department</label>
-                        <input type="text" id="taskCategory" placeholder="e.g., Cardiology, Pediatrics" value="General">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Schedule Appointment</button>
-            </form>
-        </div>
-
         <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-number" id="totalTasks">0</div>
-                <div class="stat-label">Total Patients</div>
+            <div class="stat-card stat-total">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">Total Patients</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="completedTasks">0</div>
-                <div class="stat-label">Treated</div>
+            <div class="stat-card stat-treated">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">Treated</div>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-number" id="pendingTasks">0</div>
-                <div class="stat-label">Pending</div>
+            <div class="stat-card stat-pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-info">
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
             </div>
-            <div class="stat-card stat-overdue">
-                <div class="stat-number" id="overdueTasks">0</div>
-                <div class="stat-label">Overdue/Urgent</div>
+            <div class="stat-card stat-urgent">
+                <div class="stat-icon">🚨</div>
+                <div class="stat-info">
+                    <div class="stat-number" id="overdueTasks">0</div>
+                    <div class="stat-label">Urgent</div>
+                </div>
             </div>
         </div>
 
-        <div class="tasks-container">
-            <h2>Patient Records</h2>
-            <div class="search-container">
-                <input type="text" id="searchInput" placeholder="🔍 Search patients by name, symptoms, or department...">
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="task-form-container">
+                    <h2><span class="section-icon">➕</span> New Patient Appointment</h2>
+                    <form id="taskForm">
+                        <div class="form-group">
+                            <label for="taskTitle"><span class="required">*</span> Patient Name</label>
+                            <input type="text" id="taskTitle" placeholder="Enter patient full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDescription">Medical Notes / Symptoms</label>
+                            <textarea id="taskDescription" placeholder="Enter symptoms, diagnosis, or treatment notes" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskPriority">Urgency Level</label>
+                            <select id="taskPriority" class="select-priority">
+                                <option value="low">🟢 Routine</option>
+                                <option value="medium" selected>🟡 Moderate</option>
+                                <option value="high">🔴 Critical/Emergency</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taskDueDate">Appointment Date</label>
+                            <input type="date" id="taskDueDate" class="date-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="taskCategory">Department</label>
+                            <select id="taskCategory" class="select-department">
+                                <option value="General">General Medicine</option>
+                                <option value="Cardiology">Cardiology</option>
+                                <option value="Pediatrics">Pediatrics</option>
+                                <option value="Orthopedics">Orthopedics</option>
+                                <option value="Neurology">Neurology</option>
+                                <option value="Emergency">Emergency</option>
+                                <option value="Surgery">Surgery</option>
+                                <option value="Dental">Dental</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-icon">📋</span> Schedule Appointment
+                        </button>
+                    </form>
+                </div>
             </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Patients</button>
-                <button class="filter-btn" data-filter="active">Pending Treatment</button>
-                <button class="filter-btn" data-filter="completed">Treated</button>
-                <button class="filter-btn" data-filter="high">Critical Cases</button>
-                <button class="filter-btn" data-filter="overdue">Overdue Appointments</button>
+
+            <div class="main-area">
+                <div class="tasks-container">
+                    <div class="section-header">
+                        <h2><span class="section-icon">📊</span> Patient Records</h2>
+                    </div>
+                    
+                    <div class="search-filter-bar">
+                        <div class="search-container">
+                            <span class="search-icon">🔍</span>
+                            <input type="text" id="searchInput" placeholder="Search patients by name, symptoms, or department...">
+                        </div>
+                        
+                        <div class="filter-buttons">
+                            <button class="filter-btn active" data-filter="all">
+                                <span class="filter-icon">📋</span> All
+                            </button>
+                            <button class="filter-btn" data-filter="active">
+                                <span class="filter-icon">⏳</span> Pending
+                            </button>
+                            <button class="filter-btn" data-filter="completed">
+                                <span class="filter-icon">✅</span> Treated
+                            </button>
+                            <button class="filter-btn" data-filter="high">
+                                <span class="filter-icon">🚨</span> Critical
+                            </button>
+                            <button class="filter-btn" data-filter="overdue">
+                                <span class="filter-icon">⚠️</span> Overdue
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tasksList" class="tasks-list">
+                        <!-- Patient records will be dynamically loaded here -->
+                    </div>
+                </div>
             </div>
-            <div id="tasksList" class="tasks-list">
-                <!-- Patient records will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Patient Record</h2>
+                <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="editTitle">Patient Name</label>
+                    <input type="text" id="editTitle" placeholder="Enter patient name">
+                </div>
+                <div class="form-group">
+                    <label for="editDescription">Medical Notes</label>
+                    <textarea id="editDescription" rows="4" placeholder="Enter medical notes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editPriority">Urgency Level</label>
+                    <select id="editPriority">
+                        <option value="low">🟢 Routine</option>
+                        <option value="medium">🟡 Moderate</option>
+                        <option value="high">🔴 Critical/Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editDueDate">Appointment Date</label>
+                    <input type="date" id="editDueDate">
+                </div>
+                <div class="form-group">
+                    <label for="editCategory">Department</label>
+                    <select id="editCategory">
+                        <option value="General">General Medicine</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Emergency">Emergency</option>
+                        <option value="Surgery">Surgery</option>
+                        <option value="Dental">Dental</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEdit()">Save Changes</button>
             </div>
         </div>
     </div>
