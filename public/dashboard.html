@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCare - Patient Dashboard</title>
+    <link rel="stylesheet" href="dashboard-styles.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-icon">🏥</span>
+                    <h2>MediCare</h2>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-section="overview">
+                    <span>📊</span> Overview
+                </a>
+                <a href="#" class="nav-link" data-section="appointments">
+                    <span>📅</span> Appointments
+                </a>
+                <a href="#" class="nav-link" data-section="medical-records">
+                    <span>📋</span> Medical Records
+                </a>
+                <a href="#" class="nav-link" data-section="profile">
+                    <span>👤</span> My Profile
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-logout" onclick="logout()">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 id="sectionTitle">Dashboard Overview</h1>
+                    <p id="welcomeMessage">Loading...</p>
+                </div>
+                <div class="header-right">
+                    <span class="current-date" id="currentDate"></span>
+                    <div class="user-avatar" id="userAvatar">👤</div>
+                </div>
+            </header>
+
+            <!-- Overview Section -->
+            <div id="overview-section" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card stat-blue">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="totalAppointments">0</div>
+                            <div class="stat-label">Total Appointments</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-green">
+                        <div class="stat-icon">⏰</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="upcomingAppointments">0</div>
+                            <div class="stat-label">Upcoming</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-purple">
+                        <div class="stat-icon">✅</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="completedAppointments">0</div>
+                            <div class="stat-label">Completed</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-orange">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-info">
+                            <div class="stat-number" id="medicalRecords">0</div>
+                            <div class="stat-label">Medical Records</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-grid">
+                        <button class="action-card" onclick="showSection('appointments')">
+                            <span class="action-icon">📅</span>
+                            <span>Book Appointment</span>
+                        </button>
+                        <button class="action-card" onclick="showSection('medical-records')">
+                            <span class="action-icon">📋</span>
+                            <span>View Records</span>
+                        </button>
+                        <button class="action-card" onclick="showSection('profile')">
+                            <span class="action-icon">👤</span>
+                            <span>Update Profile</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="recent-appointments">
+                    <h3>Recent Appointments</h3>
+                    <div id="recentAppointmentsList" class="appointments-list">
+                        <p class="empty-state">No recent appointments</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div id="appointments-section" class="content-section">
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="openAppointmentModal()">
+                        ➕ Book New Appointment
+                    </button>
+                </div>
+
+                <div id="appointmentsList" class="appointments-list">
+                    <p class="empty-state">Loading appointments...</p>
+                </div>
+            </div>
+
+            <!-- Medical Records Section -->
+            <div id="medical-records-section" class="content-section">
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="openRecordModal()">
+                        ➕ Add Medical Record
+                    </button>
+                </div>
+
+                <div id="medicalRecordsList" class="records-list">
+                    <p class="empty-state">Loading medical records...</p>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile-section" class="content-section">
+                <div class="profile-card">
+                    <h3>Personal Information</h3>
+                    <div id="profileInfo" class="profile-info">
+                        <p>Loading profile...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Appointment Modal -->
+    <div id="appointmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Book New Appointment</h2>
+                <span class="close-modal" onclick="closeAppointmentModal()">&times;</span>
+            </div>
+            <form id="appointmentForm" class="modal-body">
+                <div class="form-group">
+                    <label>Doctor Name *</label>
+                    <input type="text" id="doctorName" required>
+                </div>
+                <div class="form-group">
+                    <label>Department *</label>
+                    <select id="department" required>
+                        <option value="">Select Department</option>
+                        <option value="General Medicine">General Medicine</option>
+                        <option value="Cardiology">Cardiology</option>
+                        <option value="Pediatrics">Pediatrics</option>
+                        <option value="Orthopedics">Orthopedics</option>
+                        <option value="Neurology">Neurology</option>
+                        <option value="Dermatology">Dermatology</option>
+                        <option value="ENT">ENT</option>
+                        <option value="Ophthalmology">Ophthalmology</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Appointment Date *</label>
+                        <input type="date" id="appointmentDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Appointment Time *</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Symptoms / Reason *</label>
+                    <textarea id="symptoms" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="priority">
+                        <option value="routine">Routine</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeAppointmentModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Book Appointment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>

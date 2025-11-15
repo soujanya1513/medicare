@@ -22,10 +22,14 @@ const editModal = document.getElementById('editModal');
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🏥 Healthcare App Initializing...');
+    console.log('Form element:', taskForm);
+    console.log('API URL:', API_URL);
     loadTasks();
     loadStats();
     setupEventListeners();
     updateCurrentDate();
+    console.log('✅ Healthcare App Initialized');
 });
 
 // Update current date display
@@ -90,11 +94,15 @@ async function loadStats() {
 async function handleAddTask(e) {
     e.preventDefault();
     
+    console.log('📝 Form submitted');
+    
     const title = taskTitle.value.trim();
     const description = taskDescription.value.trim();
     const priority = taskPriority.value;
     const dueDate = taskDueDate.value;
     const category = taskCategory.value.trim();
+    
+    console.log('Form data:', { title, description, priority, dueDate, category });
     
     if (!title) {
         showNotification('Please enter patient name', 'error');
@@ -104,6 +112,7 @@ async function handleAddTask(e) {
     
     try {
         showLoading();
+        console.log('Sending POST request to:', API_URL);
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
@@ -112,9 +121,12 @@ async function handleAddTask(e) {
             body: JSON.stringify({ title, description, priority, dueDate, category })
         });
         
+        console.log('Response status:', response.status);
+        
         if (!response.ok) throw new Error('Failed to create task');
         
         const newTask = await response.json();
+        console.log('New task created:', newTask);
         allTasks.unshift(newTask); // Add to beginning of array
         renderTasks();
         loadStats();
@@ -128,7 +140,7 @@ async function handleAddTask(e) {
         hideLoading();
     } catch (error) {
         console.error('Error adding patient record:', error);
-        showNotification('Failed to add patient record', 'error');
+        showNotification('Failed to add patient record: ' + error.message, 'error');
         hideLoading();
     }
 }
