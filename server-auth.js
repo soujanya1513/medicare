@@ -446,6 +446,11 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
     }
 });
 
+// Root route - redirect to login
+app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Server is running on http://localhost:${PORT}`);
