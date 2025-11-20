@@ -18,12 +18,18 @@ app.use(express.static('public'));
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/healthcareapp';
 
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+console.log('🔗 Attempting to connect to MongoDB...');
+console.log('📍 Using URI:', MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//$1:****@')); // Hide password in logs
+
+mongoose.connect(MONGODB_URI)
+.then(() => {
+    console.log('✅ Connected to MongoDB - Healthcare App');
+    console.log('📊 Database:', mongoose.connection.name);
 })
-.then(() => console.log('✅ Connected to MongoDB - Healthcare App'))
-.catch(err => console.error('❌ MongoDB connection error:', err));
+.catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    console.error('💡 Check: 1) MongoDB Atlas IP whitelist (0.0.0.0/0), 2) Correct password, 3) Network access enabled');
+});
 
 // User Schema (Patients)
 const userSchema = new mongoose.Schema({
